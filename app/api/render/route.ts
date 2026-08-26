@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
               justify-content: space-between;
               align-items: center;
               font-family: 'Kantumruy Pro', sans-serif;
-              background-color: #f1f5f9;
+              background-color: #0f172a;
               overflow: hidden;
             }
             .bg-img {
@@ -66,8 +66,8 @@ export async function POST(req: NextRequest) {
               left: 0;
               width: 100%;
               height: 100%;
-              background: rgba(255, 255, 255, 0.45);
-              backdrop-filter: blur(2px);
+              background: linear-gradient(180deg, rgba(15, 23, 42, 0.7) 0%, rgba(15, 23, 42, 0.88) 100%);
+              backdrop-filter: blur(1.5px);
               z-index: 2;
             }
             .header {
@@ -76,19 +76,20 @@ export async function POST(req: NextRequest) {
               margin-top: 100px;
               font-size: 32px;
               font-weight: 700;
-              color: #0f172a;
+              color: #f59e0b;
               letter-spacing: 2px;
+              text-transform: uppercase;
             }
             .quote-container {
               position: relative;
               z-index: 3;
-              width: 82%;
+              width: 84%;
               text-align: center;
-              font-size: 54px;
-              line-height: 1.6;
+              font-size: 52px;
+              line-height: 1.7;
               font-weight: 700;
-              color: #0f172a;
-              text-shadow: 0 2px 10px rgba(255, 255, 255, 0.8);
+              color: #ffffff;
+              text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
             }
             .footer {
               position: relative;
@@ -96,7 +97,8 @@ export async function POST(req: NextRequest) {
               margin-bottom: 80px;
               font-size: 24px;
               font-weight: 600;
-              color: #334155;
+              color: #94a3b8;
+              letter-spacing: 1px;
             }
           </style>
         </head>
