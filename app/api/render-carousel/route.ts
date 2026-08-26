@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import puppeteer from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
 
-export const maxDuration = 60; // អនុញ្ញាតឱ្យ run ដល់ 60s
+export const maxDuration = 60;
 export const dynamic = "force-dynamic";
 
 interface SlideData {
@@ -24,14 +24,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // កំណត់ Chromium សម្រាប់ Vercel Serverless
-    const isLocal = process.env.NODE_ENV === "development";
+    // Launch Browser ដោយប្រើ Sparticuz Chromium សម្រាប់ Vercel
     browser = await puppeteer.launch({
-      args: isLocal ? puppeteer.defaultArgs() : chromium.args,
+      args: chromium.args,
       defaultViewport: chromium.defaultViewport,
-      executablePath: isLocal
-        ? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" // ឬផ្លូវ Chrome លើម៉ាស៊ីន
-        : await chromium.executablePath(),
+      executablePath: await chromium.executablePath(),
       headless: chromium.headless,
     });
 

@@ -1,13 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  typescript: {
-    ignoreBuildErrors: true,
+  serverExternalPackages: ["@sparticuz/chromium", "puppeteer-core"],
+  outputFileTracingIncludes: {
+    "/api/**/*": ["./node_modules/@sparticuz/chromium/bin/**"],
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  serverExternalPackages: ["@sparticuz/chromium-min", "puppeteer-core"],
 };
 
 export default nextConfig;
