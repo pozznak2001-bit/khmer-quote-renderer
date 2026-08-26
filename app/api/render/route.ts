@@ -3,10 +3,12 @@ import chromium from "@sparticuz/chromium-min";
 import puppeteer from "puppeteer-core";
 
 export const maxDuration = 60;
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
-    const { bgUrl, quote, brand = "@weread.businessplan | weread.asia" } = await req.json();
+    const body = await req.json();
+    const { bgUrl, quote, brand = "@weread.businessplan | weread.asia" } = body;
 
     if (!quote) {
       return NextResponse.json({ error: "Quote is required" }, { status: 400 });
@@ -113,7 +115,7 @@ export async function POST(req: NextRequest) {
     const screenshotBuffer = await page.screenshot({ type: "png" });
     await browser.close();
 
-    return new NextResponse(screenshotBuffer, {
+    return new Response(screenshotBuffer as any, {
       status: 200,
       headers: {
         "Content-Type": "image/png",
