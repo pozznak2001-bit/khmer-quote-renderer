@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-core";
+import chromium from "@sparticuz/chromium";
+
+export const maxDuration = 60; // អនុញ្ញាតឱ្យ run ដល់ 60s
+export const dynamic = "force-dynamic";
 
 interface SlideData {
   category?: string;
@@ -9,6 +13,7 @@ interface SlideData {
 }
 
 export async function POST(req: NextRequest) {
+  let browser = null;
   try {
     const { slides, brand = "WERead Asia" } = await req.json();
 
@@ -19,9 +24,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    // កំណត់ Chromium សម្រាប់ Vercel Serverless
+    const isLocal = process.env.NODE_ENV === "development";
+    browser = await puppeteer.launch({
+      args: isLocal ? puppeteer.defaultArgs() : chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: isLocal
+        ? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" // ឬផ្លូវ Chrome លើម៉ាស៊ីន
+        : await chromium.executablePath(),
+      headless: chromium.headless,
     });
 
     const renderedImages: string[] = [];
@@ -63,8 +74,6 @@ export async function POST(req: NextRequest) {
             padding: 80px;
             overflow: hidden;
           }
-
-          /* Header */
           .header {
             display: flex;
             justify-content: space-between;
@@ -86,8 +95,6 @@ export async function POST(req: NextRequest) {
             color: #64748b;
             font-weight: 600;
           }
-
-          /* Slide Types */
           .content-container {
             display: flex;
             flex-direction: column;
@@ -95,8 +102,6 @@ export async function POST(req: NextRequest) {
             flex: 1;
             margin: 40px 0;
           }
-
-          /* Cover Layout */
           .cover-layout .category-label {
             color: #94a3b8;
             font-size: 32px;
@@ -110,8 +115,6 @@ export async function POST(req: NextRequest) {
             color: #38bdf8;
             text-shadow: 0 0 40px rgba(56, 189, 248, 0.2);
           }
-
-          /* Standard Content Layout */
           .standard-layout .main-title {
             font-size: 52px;
             line-height: 1.35;
@@ -131,8 +134,6 @@ export async function POST(req: NextRequest) {
             line-height: 1.6;
             color: #cbd5e1;
           }
-
-          /* CTA Layout */
           .cta-layout {
             text-align: center;
             align-items: center;
@@ -156,8 +157,6 @@ export async function POST(req: NextRequest) {
             line-height: 1.6;
             color: #e0f2fe;
           }
-
-          /* Footer */
           .footer {
             display: flex;
             justify-content: space-between;
@@ -174,9 +173,6 @@ export async function POST(req: NextRequest) {
             font-size: 26px;
             color: #38bdf8;
             font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
           }
         </style>
       </head>
@@ -186,21 +182,17 @@ export async function POST(req: NextRequest) {
           <div class="slide-counter">${index + 1} / ${slides.length}</div>
         </div>
 
-        <div class="content-container ${isCover ? 'cover-layout' : isCTA ? 'cta-layout' : 'standard-layout'}">
-          ${isCover ? `
-            <div class="category-label">${categoryText}</div>
-            <h1 class="main-title">${titleText}</h1>
-          ` : isCTA ? `
-            <h1 class="main-title">${titleText}</h1>
-            <div class="cta-card">
-              <p class="body-text">${bodyText}</p>
-            </div>
-          ` : `
-            <h1 class="main-title">${titleText}</h1>
-            <div class="body-box">
-              <p class="body-text">${bodyText}</p>
-            </div>
-          `}
+        <div class="content-container ${isCover ? "cover-layout" : isCTA ? "cta-layout" : "standard-layout"}">
+          ${
+            isCover
+              ? `<div class="category-label">${categoryText}</div>
+                 <h1 class="main-title">${titleText}</h1>`
+              : isCTA
+              ? `<h1 class="main-title">${titleText}</h1>
+                 <div class="cta-card"><p class="body-text">${bodyText}</p></div>`
+              : `<h1 class="main-title">${titleText}</h1>
+                 <div class="body-box"><p class="body-text">${bodyText}</p></div>`
+          }
         </div>
 
         <div class="footer">
@@ -215,11 +207,9 @@ export async function POST(req: NextRequest) {
       await page.setViewport({ width: 1080, height: 1350, deviceScaleFactor: 2 });
       await page.setContent(htmlContent, { waitUntil: "networkidle0" });
       const buffer = await page.screenshot({ type: "png" });
-      renderedImages.push(buffer.toString("base64"));
+      renderedImages.push(Buffer.from(buffer).toString("base64"));
       await page.close();
     }
-
-    await browser.close();
 
     return NextResponse.json({
       success: true,
@@ -229,5 +219,9 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error("Carousel Render Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
   }
 }
