@@ -5,17 +5,12 @@ import chromium from "@sparticuz/chromium";
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
 
-interface SlideData {
-  category?: string;
-  title: string;
-  body?: string;
-  description?: string;
-}
-
 export async function POST(req: NextRequest) {
-  let browser = null;
+  let browser: any = null;
   try {
-    const { slides, brand = "WERead Asia" } = await req.json();
+    const body = await req.json();
+    const slides = body.slides;
+    const brand = body.brand || "WERead Asia";
 
     if (!slides || !Array.isArray(slides) || slides.length === 0) {
       return NextResponse.json(
@@ -24,7 +19,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Launch Browser ដោយប្រើ Sparticuz Chromium សម្រាប់ Vercel
     browser = await puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
@@ -35,7 +29,7 @@ export async function POST(req: NextRequest) {
     const renderedImages: string[] = [];
 
     for (let index = 0; index < slides.length; index++) {
-      const slide = slides[index] as SlideData;
+      const slide = slides[index];
       const isCover = index === 0;
       const isCTA = index === slides.length - 1;
       const categoryText = slide.category || "KNOWLEDGE INSIGHT";
