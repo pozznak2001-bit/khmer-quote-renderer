@@ -5,7 +5,6 @@ import chromium from "@sparticuz/chromium";
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
 
-// 5 Minimalist Themes based on user request
 const THEMES = [
   { name: "dark_gold", bg: "#151515", titleColor: "#FCD34D", bodyColor: "#F3F4F6", layout: "centered" },
   { name: "navy_icon", bg: "#0D2C3E", titleColor: "#FFFFFF", bodyColor: "#E2E8F0", layout: "icon_top" },
@@ -26,9 +25,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Slides array is required" }, { status: 400 });
     }
 
-    // Fix Khmer Fonts
-    await chromium.font("https://raw.githack.com/google/fonts/main/ofl/kantumruypro/KantumruyPro%5Bwght%5D.ttf");
-
     // Randomize Theme based on Topic Hash
     let hash = 0;
     for (let i = 0; i < topic.length; i++) { hash = topic.charCodeAt(i) + ((hash << 5) - hash); }
@@ -37,7 +33,7 @@ export async function POST(req: NextRequest) {
     chromium.setGraphicsMode = false;
     browser = await puppeteer.launch({
       args: [...chromium.args, "--disable-web-security", "--no-sandbox", "--disable-setuid-sandbox", "--disable-gpu"],
-      defaultViewport: { width: 1080, height: 1080, deviceScaleFactor: 1.5 }, // Using 1080x1080 (1:1) for standard quote look
+      defaultViewport: { width: 1080, height: 1080, deviceScaleFactor: 1.5 },
       executablePath: await chromium.executablePath(),
       headless: chromium.headless,
     });
@@ -51,7 +47,6 @@ export async function POST(req: NextRequest) {
 
         let contentHTML = "";
         
-        // Render different internal layouts based on the chosen theme
         if (currentTheme.layout === "box") {
           contentHTML = `
             <div class="inner-box">
@@ -89,7 +84,6 @@ export async function POST(req: NextRequest) {
             </div>
           `;
         } else {
-          // Default dark_gold layout
           contentHTML = `
             <div class="content-wrapper">
               <div class="quote-mark-right">❞</div>
@@ -116,35 +110,28 @@ export async function POST(req: NextRequest) {
             }
             .counter { position: absolute; top: 50px; right: 50px; font-size: 20px; font-weight: 600; color: rgba(255,255,255,0.4); }
             
-            /* Typography */
             .title { font-size: 60px; line-height: 1.5; font-weight: 700; color: ${currentTheme.titleColor}; margin-bottom: 30px; text-align: center; max-width: 900px;}
             .body { font-size: 44px; line-height: 1.6; font-weight: 500; color: ${currentTheme.bodyColor}; text-align: center; max-width: 900px;}
             .brand { font-size: 24px; font-weight: 500; color: rgba(255,255,255,0.7); margin-top: 60px; text-align: center; letter-spacing: 1px;}
             
-            /* Wrappers */
             .content-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; }
             
-            /* Shadow Box Style */
             .inner-box {
               background: #18181B; width: 850px; height: 850px; border-radius: 20px;
               display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 60px;
               box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
             }
 
-            /* Framed Style */
             .frame {
               width: 940px; height: 940px; border: 3px solid rgba(255,255,255,0.8);
               display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 60px; position: relative;
             }
 
-            /* Icon Style */
             .icon { width: 120px; height: 120px; color: #FFFFFF; margin-bottom: 40px; opacity: 0.9; }
 
-            /* Highlight Style */
             .hl-pink { background: #F9A8D4; padding: 8px 20px; border-radius: 8px; line-height: 1.8; display: inline-block; transform: rotate(-1deg); }
             .hl-yellow { background: #FDE047; padding: 8px 20px; border-radius: 8px; line-height: 1.8; display: inline-block; transform: rotate(1deg); color: #111;}
             
-            /* Quotes */
             .quote-mark { font-size: 80px; color: ${currentTheme.titleColor}; margin-bottom: 20px; line-height: 1; }
             .quote-mark-right { align-self: flex-end; font-size: 100px; color: ${currentTheme.titleColor}; opacity: 0.8; margin-bottom: -40px; line-height: 1;}
           </style>
