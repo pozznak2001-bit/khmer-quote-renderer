@@ -19,16 +19,14 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const slides = body.slides;
     const brand = body.brand || "@weread.asia";
-    const topic = body.topic || (slides[0] && (slides[0].title || slides[0].category)) || "Default";
 
     if (!slides || !Array.isArray(slides) || slides.length === 0) {
       return NextResponse.json({ error: "Slides array is required" }, { status: 400 });
     }
 
-    // Randomize Theme based on Topic Hash
-    let hash = 0;
-    for (let i = 0; i < topic.length; i++) { hash = topic.charCodeAt(i) + ((hash << 5) - hash); }
-    const currentTheme = THEMES[Math.abs(hash) % THEMES.length];
+    // 🌟 ការផ្លាស់ប្តូរទី ១៖ រើស Theme ដោយ Random (ចៃដន្យ) ធានាថាចេញគ្រប់ ៥ ស្ទីល
+    const randomIndex = Math.floor(Math.random() * THEMES.length);
+    const currentTheme = THEMES[randomIndex];
 
     chromium.setGraphicsMode = false;
     browser = await puppeteer.launch({
@@ -50,7 +48,7 @@ export async function POST(req: NextRequest) {
         if (currentTheme.layout === "box") {
           contentHTML = `
             <div class="inner-box">
-              <h1 class="title">${titleText}</h1>
+              ${titleText ? `<h1 class="title">${titleText}</h1>` : ""}
               ${bodyText ? `<p class="body">${bodyText}</p>` : ""}
               <div class="brand">${brand}</div>
             </div>
@@ -59,7 +57,7 @@ export async function POST(req: NextRequest) {
           contentHTML = `
             <div class="frame">
               <div class="quote-mark">❞</div>
-              <h1 class="title">${titleText}</h1>
+              ${titleText ? `<h1 class="title">${titleText}</h1>` : ""}
               ${bodyText ? `<p class="body">${bodyText}</p>` : ""}
               <div class="brand">${brand}</div>
             </div>
@@ -68,9 +66,9 @@ export async function POST(req: NextRequest) {
           contentHTML = `
             <div class="content-wrapper">
               <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M13 17l5-5-5-5M6 17l5-5-5-5"/>
+                <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
               </svg>
-              <h1 class="title">${titleText}</h1>
+              ${titleText ? `<h1 class="title">${titleText}</h1>` : ""}
               ${bodyText ? `<p class="body">${bodyText}</p>` : ""}
               <div class="brand">${brand}</div>
             </div>
@@ -78,17 +76,18 @@ export async function POST(req: NextRequest) {
         } else if (currentTheme.layout === "highlight") {
           contentHTML = `
             <div class="content-wrapper">
-              <h1 class="title"><span class="hl-pink">${titleText}</span></h1>
+              ${titleText ? `<h1 class="title"><span class="hl-pink">${titleText}</span></h1>` : ""}
               ${bodyText ? `<p class="body"><span class="hl-yellow">${bodyText}</span></p>` : ""}
-              <div class="brand" style="color: #6B7280;">ស្តាប់សៀវភៅ ${brand}</div>
+              <div class="brand" style="color: #6B7280; margin-top: 50px;">ស្តាប់សៀវភៅ ${brand}</div>
             </div>
           `;
         } else {
+          // Default dark_gold layout
           contentHTML = `
             <div class="content-wrapper">
               <div class="quote-mark-right">❞</div>
-              <h1 class="title">${titleText}</h1>
-              ${bodyText ? `<p class="body">${bodyText}</p>` : ""}
+              ${titleText ? `<h1 class="title" style="text-align: left; align-self: flex-start;">${titleText}</h1>` : ""}
+              ${bodyText ? `<p class="body" style="text-align: left; align-self: flex-start;">${bodyText}</p>` : ""}
               <div class="brand" style="text-align: left; align-self: flex-start; margin-top: auto;">${brand}</div>
             </div>
           `;
@@ -111,7 +110,7 @@ export async function POST(req: NextRequest) {
             .counter { position: absolute; top: 50px; right: 50px; font-size: 20px; font-weight: 600; color: rgba(255,255,255,0.4); }
             
             .title { font-size: 60px; line-height: 1.5; font-weight: 700; color: ${currentTheme.titleColor}; margin-bottom: 30px; text-align: center; max-width: 900px;}
-            .body { font-size: 44px; line-height: 1.6; font-weight: 500; color: ${currentTheme.bodyColor}; text-align: center; max-width: 900px;}
+            .body { font-size: 42px; line-height: 1.6; font-weight: 500; color: ${currentTheme.bodyColor}; text-align: center; max-width: 900px;}
             .brand { font-size: 24px; font-weight: 500; color: rgba(255,255,255,0.7); margin-top: 60px; text-align: center; letter-spacing: 1px;}
             
             .content-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; }
@@ -127,10 +126,10 @@ export async function POST(req: NextRequest) {
               display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 60px; position: relative;
             }
 
-            .icon { width: 120px; height: 120px; color: #FFFFFF; margin-bottom: 40px; opacity: 0.9; }
+            .icon { width: 120px; height: 120px; color: ${currentTheme.titleColor}; margin-bottom: 40px; opacity: 0.9; }
 
-            .hl-pink { background: #F9A8D4; padding: 8px 20px; border-radius: 8px; line-height: 1.8; display: inline-block; transform: rotate(-1deg); }
-            .hl-yellow { background: #FDE047; padding: 8px 20px; border-radius: 8px; line-height: 1.8; display: inline-block; transform: rotate(1deg); color: #111;}
+            .hl-pink { background: #F9A8D4; color: #111; padding: 8px 20px; border-radius: 8px; line-height: 1.8; display: inline-block; transform: rotate(-1deg); }
+            .hl-yellow { background: #FDE047; color: #111; padding: 8px 20px; border-radius: 8px; line-height: 1.8; display: inline-block; transform: rotate(1deg); }
             
             .quote-mark { font-size: 80px; color: ${currentTheme.titleColor}; margin-bottom: 20px; line-height: 1; }
             .quote-mark-right { align-self: flex-end; font-size: 100px; color: ${currentTheme.titleColor}; opacity: 0.8; margin-bottom: -40px; line-height: 1;}
