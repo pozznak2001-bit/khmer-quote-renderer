@@ -5,12 +5,14 @@ import chromium from "@sparticuz/chromium";
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
 
+// តារាង Style ទាំង ៦ តាមលំដាប់លំដោយ
 const THEMES = [
-  { name: "dark_gold", bg: "#151515", titleColor: "#FCD34D", bodyColor: "#F3F4F6", layout: "centered" },
-  { name: "navy_icon", bg: "#0D2C3E", titleColor: "#FFFFFF", bodyColor: "#E2E8F0", layout: "icon_top" },
-  { name: "shadow_box", bg: "radial-gradient(circle, #27272A 0%, #09090B 100%)", titleColor: "#D4AF37", bodyColor: "#FFFFFF", layout: "box" },
-  { name: "paper_highlight", bg: "#F8F9FA", titleColor: "#111827", bodyColor: "#1F2937", layout: "highlight" },
-  { name: "green_frame", bg: "linear-gradient(135deg, #064E3B 0%, #022C22 100%)", titleColor: "#FFFFFF", bodyColor: "#D1FAE5", layout: "framed" }
+  { name: "shadow_box" },      // 1. ប្រអប់ខ្មៅមានស្រមោល (រូបទី១)
+  { name: "paper_highlight" }, // 2. ផ្ទៃស មាន Highlight ផ្កាឈូក/លឿង (រូបទី២)
+  { name: "glass_box" },       // 3. ប្រអប់ថ្លា (Glassmorphism) (រូបទី៣)
+  { name: "green_frame" },     // 4. ផ្ទៃបៃតង មានស៊ុមស (រូបទី៤)
+  { name: "dark_gold" },       // 5. ផ្ទៃខ្មៅ អក្សរមាសសាមញ្ញ (រូបទី៥)
+  { name: "inverse_block" }    // 6. ផ្ទៃស អក្សរខ្មៅ មានប្រអប់អក្សរមាស (រូបទី៦)
 ];
 
 export async function POST(req: NextRequest) {
@@ -19,14 +21,14 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const slides = body.slides;
     const brand = body.brand || "@weread.asia";
+    
+    // ចាប់យកលេខរៀង Row Number ពី Google Sheets ដើម្បីវិលជុំ Style ទាំង ៦
+    const rowNumber = parseInt(body.row) || Math.floor(Math.random() * 6);
+    const currentTheme = THEMES[rowNumber % 6];
 
     if (!slides || !Array.isArray(slides) || slides.length === 0) {
       return NextResponse.json({ error: "Slides array is required" }, { status: 400 });
     }
-
-    // 🌟 ការផ្លាស់ប្តូរទី ១៖ រើស Theme ដោយ Random (ចៃដន្យ) ធានាថាចេញគ្រប់ ៥ ស្ទីល
-    const randomIndex = Math.floor(Math.random() * THEMES.length);
-    const currentTheme = THEMES[randomIndex];
 
     chromium.setGraphicsMode = false;
     browser = await puppeteer.launch({
@@ -44,53 +46,67 @@ export async function POST(req: NextRequest) {
         const slideNum = index + 1;
 
         let contentHTML = "";
+        let cssStyles = "";
+
+        if (currentTheme.name === "shadow_box") {
+          cssStyles = `
+            body { background: #383838; display: flex; justify-content: center; align-items: center; }
+            .inner-box { background: #1C1C1C; width: 850px; height: 850px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 60px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); }
+            .title { font-size: 58px; color: #D4AF37; margin-bottom: 25px; text-align: center; }
+            .body { font-size: 42px; color: #FFFFFF; text-align: center; }
+            .brand { color: #FFFFFF; font-size: 24px; margin-top: 40px; }
+          `;
+          contentHTML = `<div class="inner-box"><h1 class="title">${titleText}</h1>${bodyText ? `<p class="body">${bodyText}</p>` : ""}<div class="brand">${brand}</div></div>`;
         
-        if (currentTheme.layout === "box") {
-          contentHTML = `
-            <div class="inner-box">
-              ${titleText ? `<h1 class="title">${titleText}</h1>` : ""}
-              ${bodyText ? `<p class="body">${bodyText}</p>` : ""}
-              <div class="brand">${brand}</div>
-            </div>
+        } else if (currentTheme.name === "paper_highlight") {
+          cssStyles = `
+            body { background: #F4F4F5; display: flex; justify-content: center; align-items: center; }
+            .content-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+            .hl-pink { background: #FF9BE6; color: #111; padding: 12px 30px; border-radius: 8px; display: inline-block; transform: rotate(-2deg); margin-bottom: 30px; font-size: 58px; font-weight: 700; line-height: 1.5; }
+            .hl-yellow { background: #FFF066; color: #111; padding: 12px 30px; border-radius: 8px; display: inline-block; transform: rotate(1deg); font-size: 44px; font-weight: 600; line-height: 1.5;}
+            .brand { color: #333; font-size: 24px; margin-top: 60px; font-weight: 600; }
           `;
-        } else if (currentTheme.layout === "framed") {
-          contentHTML = `
-            <div class="frame">
-              <div class="quote-mark">❞</div>
-              ${titleText ? `<h1 class="title">${titleText}</h1>` : ""}
-              ${bodyText ? `<p class="body">${bodyText}</p>` : ""}
-              <div class="brand">${brand}</div>
-            </div>
+          contentHTML = `<div class="content-wrapper">${titleText ? `<div class="hl-pink">${titleText}</div>` : ""}${bodyText ? `<div class="hl-yellow">${bodyText}</div>` : ""}<div class="brand">${brand}</div></div>`;
+        
+        } else if (currentTheme.name === "glass_box") {
+          cssStyles = `
+            body { background: linear-gradient(135deg, #4b4b4b, #222222); display: flex; justify-content: center; align-items: center; }
+            .glass { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(20px); width: 880px; height: 600px; border: 2px solid rgba(255,255,255,0.2); border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 50px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+            .title { font-size: 58px; color: #FFFFFF; margin-bottom: 25px; text-align: center; }
+            .body { font-size: 42px; color: #FFFFFF; text-align: center; }
+            .brand { color: rgba(255,255,255,0.8); font-size: 24px; margin-top: 40px; }
           `;
-        } else if (currentTheme.layout === "icon_top") {
-          contentHTML = `
-            <div class="content-wrapper">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-              </svg>
-              ${titleText ? `<h1 class="title">${titleText}</h1>` : ""}
-              ${bodyText ? `<p class="body">${bodyText}</p>` : ""}
-              <div class="brand">${brand}</div>
-            </div>
+          contentHTML = `<div class="glass"><h1 class="title">${titleText}</h1>${bodyText ? `<p class="body">${bodyText}</p>` : ""}<div class="brand">${brand}</div></div>`;
+        
+        } else if (currentTheme.name === "green_frame") {
+          cssStyles = `
+            body { background: #14301C; display: flex; justify-content: center; align-items: center; padding: 60px; }
+            .frame { border: 2px solid #FFFFFF; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 50px; position: relative; }
+            .quote-icon { font-size: 80px; color: #FFFFFF; margin-bottom: 20px; line-height: 1; }
+            .title { font-size: 58px; color: #FFFFFF; margin-bottom: 25px; text-align: center; }
+            .body { font-size: 42px; color: #FFFFFF; text-align: center; }
+            .brand { color: #FFFFFF; font-size: 24px; position: absolute; bottom: 40px; }
           `;
-        } else if (currentTheme.layout === "highlight") {
-          contentHTML = `
-            <div class="content-wrapper">
-              ${titleText ? `<h1 class="title"><span class="hl-pink">${titleText}</span></h1>` : ""}
-              ${bodyText ? `<p class="body"><span class="hl-yellow">${bodyText}</span></p>` : ""}
-              <div class="brand" style="color: #6B7280; margin-top: 50px;">ស្តាប់សៀវភៅ ${brand}</div>
-            </div>
+          contentHTML = `<div class="frame"><div class="quote-icon">❞</div><h1 class="title">${titleText}</h1>${bodyText ? `<p class="body">${bodyText}</p>` : ""}<div class="brand">${brand}</div></div>`;
+        
+        } else if (currentTheme.name === "dark_gold") {
+          cssStyles = `
+            body { background: #111111; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 100px; }
+            .title { font-size: 64px; color: #EAB308; margin-bottom: 40px; text-align: center; }
+            .body { font-size: 46px; color: #FFFFFF; text-align: center; }
+            .brand { color: #FFFFFF; font-size: 24px; margin-top: 60px; align-self: flex-end; }
           `;
-        } else {
-          // Default dark_gold layout
-          contentHTML = `
-            <div class="content-wrapper">
-              <div class="quote-mark-right">❞</div>
-              ${titleText ? `<h1 class="title" style="text-align: left; align-self: flex-start;">${titleText}</h1>` : ""}
-              ${bodyText ? `<p class="body" style="text-align: left; align-self: flex-start;">${bodyText}</p>` : ""}
-              <div class="brand" style="text-align: left; align-self: flex-start; margin-top: auto;">${brand}</div>
-            </div>
+          contentHTML = `<h1 class="title">${titleText}</h1>${bodyText ? `<p class="body">${bodyText}</p>` : ""}<div class="brand">${brand}</div>`;
+        
+        } else if (currentTheme.name === "inverse_block") {
+          cssStyles = `
+            body { background: #FAFAFA; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 80px; }
+            .content-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+            .title { font-size: 60px; color: #111111; margin-bottom: 30px; text-align: center; font-weight: 700; }
+            .block-body { background: #111111; color: #EAB308; padding: 15px 30px; font-size: 46px; text-align: center; font-weight: 600; display: inline-block; }
+            .brand { color: #111111; font-size: 24px; margin-top: 60px; font-weight: 600;}
           `;
+          contentHTML = `<div class="content-wrapper"><h1 class="title">${titleText}</h1>${bodyText ? `<div class="block-body">${bodyText}</div>` : ""}<div class="brand">${brand}</div></div>`;
         }
 
         const htmlContent = `
@@ -101,38 +117,9 @@ export async function POST(req: NextRequest) {
           <style>
             @import url('https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@500;600;700&display=swap');
             * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Kantumruy Pro', sans-serif; }
-            body {
-              width: 1080px; height: 1080px;
-              background: ${currentTheme.bg};
-              display: flex; justify-content: center; align-items: center;
-              padding: 80px; position: relative; overflow: hidden;
-            }
-            .counter { position: absolute; top: 50px; right: 50px; font-size: 20px; font-weight: 600; color: rgba(255,255,255,0.4); }
-            
-            .title { font-size: 60px; line-height: 1.5; font-weight: 700; color: ${currentTheme.titleColor}; margin-bottom: 30px; text-align: center; max-width: 900px;}
-            .body { font-size: 42px; line-height: 1.6; font-weight: 500; color: ${currentTheme.bodyColor}; text-align: center; max-width: 900px;}
-            .brand { font-size: 24px; font-weight: 500; color: rgba(255,255,255,0.7); margin-top: 60px; text-align: center; letter-spacing: 1px;}
-            
-            .content-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; }
-            
-            .inner-box {
-              background: #18181B; width: 850px; height: 850px; border-radius: 20px;
-              display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 60px;
-              box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
-            }
-
-            .frame {
-              width: 940px; height: 940px; border: 3px solid rgba(255,255,255,0.8);
-              display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 60px; position: relative;
-            }
-
-            .icon { width: 120px; height: 120px; color: ${currentTheme.titleColor}; margin-bottom: 40px; opacity: 0.9; }
-
-            .hl-pink { background: #F9A8D4; color: #111; padding: 8px 20px; border-radius: 8px; line-height: 1.8; display: inline-block; transform: rotate(-1deg); }
-            .hl-yellow { background: #FDE047; color: #111; padding: 8px 20px; border-radius: 8px; line-height: 1.8; display: inline-block; transform: rotate(1deg); }
-            
-            .quote-mark { font-size: 80px; color: ${currentTheme.titleColor}; margin-bottom: 20px; line-height: 1; }
-            .quote-mark-right { align-self: flex-end; font-size: 100px; color: ${currentTheme.titleColor}; opacity: 0.8; margin-bottom: -40px; line-height: 1;}
+            body { width: 1080px; height: 1080px; overflow: hidden; position: relative; }
+            .counter { position: absolute; top: 40px; right: 50px; font-size: 22px; font-weight: 600; color: #888; z-index: 10; }
+            ${cssStyles}
           </style>
         </head>
         <body>
