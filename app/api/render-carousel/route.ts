@@ -187,12 +187,11 @@ export async function POST(req: NextRequest) {
 
       if (!container || !titleEl) return;
 
-      // ទុកគម្លាត 85% នៃ Container កុំឱ្យអក្សររីកកៀកគែមពេក
       const maxHeight = (container.clientHeight || 750) * 0.85;
       const maxWidth = (container.clientWidth || 880) * 0.85;
 
       let low = 32;
-      let high = 84; // កំណត់ទំហំអតិបរមាត្រឹម 84px ដើម្បីកុំឱ្យធំហួសហេតុ
+      let high = 84; 
       let bestTitleSize = low;
 
       while (low <= high) {
@@ -215,15 +214,16 @@ export async function POST(req: NextRequest) {
     });
 
     const buffer = await page.screenshot({ type: "jpeg", quality: 95 });
+    
+    // បម្លែងជារូបភាព Base64 សម្រាប់ប្រើជាមួយ Make.com វិញ
+    const imageBase64 = Buffer.from(buffer).toString("base64");
+    
     await page.close();
 
-    // បញ្ជូនជារូបភាព JPEG ផ្ទាល់តែម្ដង ដើម្បីងាយស្រួល Test ក្នុង Thunder Client
-    return new Response(buffer, {
-      status: 200,
-      headers: {
-        "Content-Type": "image/jpeg",
-        "Content-Length": buffer.length.toString(),
-      },
+    return NextResponse.json({
+      success: true,
+      image: imageBase64,
+      images: [imageBase64]
     });
 
   } catch (error: any) {
