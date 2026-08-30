@@ -48,9 +48,9 @@ export async function POST(req: NextRequest) {
       cssStyles = `
         body { background: #383838; display: flex; justify-content: center; align-items: center; }
         .inner-box { background: #1C1C1C; width: 850px; height: 850px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 60px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); }
-        .title { font-size: 64px; color: #D4AF37; margin-bottom: 25px; text-align: center; line-height: 1.4; }
-        .sub { font-size: 44px; color: #FFFFFF; text-align: center; line-height: 1.4; }
-        .brand { color: #FFFFFF; font-size: 24px; margin-top: 50px; }
+        .title { font-size: 76px; color: #D4AF37; margin-bottom: 25px; text-align: center; line-height: 1.35; }
+        .sub { font-size: 52px; color: #FFFFFF; text-align: center; line-height: 1.35; }
+        .brand { color: #FFFFFF; font-size: 26px; margin-top: 50px; }
       `;
       contentHTML = `<div class="inner-box"><h1 class="title">${titleText}</h1>${subText ? `<p class="sub">${subText}</p>` : ""}<div class="brand">${brand}</div></div>`;
     
@@ -58,9 +58,9 @@ export async function POST(req: NextRequest) {
       cssStyles = `
         body { background: #F4F4F5; display: flex; justify-content: center; align-items: center; }
         .content-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; }
-        .hl-pink { background: #FF9BE6; color: #111; padding: 16px 36px; border-radius: 8px; display: inline-block; transform: rotate(-2deg); margin-bottom: 30px; font-size: 62px; font-weight: 700; line-height: 1.4; text-align: center; }
-        .hl-yellow { background: #FFF066; color: #111; padding: 14px 34px; border-radius: 8px; display: inline-block; transform: rotate(1deg); font-size: 46px; font-weight: 600; line-height: 1.4; text-align: center; }
-        .brand { color: #333; font-size: 24px; margin-top: 60px; font-weight: 600; }
+        .hl-pink { background: #FF9BE6; color: #111; padding: 20px 40px; border-radius: 10px; display: inline-block; transform: rotate(-2deg); margin-bottom: 30px; font-size: 74px; font-weight: 700; line-height: 1.35; text-align: center; }
+        .hl-yellow { background: #FFF066; color: #111; padding: 18px 38px; border-radius: 10px; display: inline-block; transform: rotate(1deg); font-size: 54px; font-weight: 600; line-height: 1.35; text-align: center; }
+        .brand { color: #333; font-size: 26px; margin-top: 60px; font-weight: 600; }
       `;
       contentHTML = `<div class="content-wrapper"><div class="hl-pink">${titleText}</div>${subText ? `<div class="hl-yellow">${subText}</div>` : ""}<div class="brand">${brand}</div></div>`;
     
@@ -68,9 +68,9 @@ export async function POST(req: NextRequest) {
       cssStyles = `
         body { background: linear-gradient(135deg, #4b4b4b, #222222); display: flex; justify-content: center; align-items: center; }
         .glass { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(20px); width: 880px; height: 650px; border: 2px solid rgba(255,255,255,0.2); border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 50px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
-        .title { font-size: 64px; color: #FFFFFF; margin-bottom: 25px; text-align: center; line-height: 1.4; }
-        .sub { font-size: 44px; color: #FFFFFF; text-align: center; line-height: 1.4; }
-        .brand { color: rgba(255,255,255,0.8); font-size: 24px; margin-top: 45px; }
+        .title { font-size: 76px; color: #FFFFFF; margin-bottom: 25px; text-align: center; line-height: 1.35; }
+        .sub { font-size: 52px; color: #FFFFFF; text-align: center; line-height: 1.35; }
+        .brand { color: rgba(255,255,255,0.8); font-size: 26px; margin-top: 45px; }
       `;
       contentHTML = `<div class="glass"><h1 class="title">${titleText}</h1>${subText ? `<p class="sub">${subText}</p>` : ""}<div class="brand">${brand}</div></div>`;
     
@@ -78,19 +78,19 @@ export async function POST(req: NextRequest) {
       cssStyles = `
         body { background: #14301C; display: flex; justify-content: center; align-items: center; padding: 60px; }
         .frame { border: 2px solid #FFFFFF; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 50px; position: relative; }
-        .quote-icon { font-size: 80px; color: #FFFFFF; margin-bottom: 20px; line-height: 1; }
-        .title { font-size: 64px; color: #FFFFFF; margin-bottom: 25px; text-align: center; line-height: 1.4; }
-        .sub { font-size: 44px; color: #FFFFFF; text-align: center; line-height: 1.4; }
-        .brand { color: #FFFFFF; font-size: 24px; position: absolute; bottom: 40px; }
+        .quote-icon { font-size: 90px; color: #FFFFFF; margin-bottom: 20px; line-height: 1; }
+        .title { font-size: 76px; color: #FFFFFF; margin-bottom: 25px; text-align: center; line-height: 1.35; }
+        .sub { font-size: 52px; color: #FFFFFF; text-align: center; line-height: 1.35; }
+        .brand { color: #FFFFFF; font-size: 26px; position: absolute; bottom: 40px; }
       `;
       contentHTML = `<div class="frame"><div class="quote-icon">❞</div><h1 class="title">${titleText}</h1>${subText ? `<p class="sub">${subText}</p>` : ""}<div class="brand">${brand}</div></div>`;
     
     } else if (currentTheme.name === "dark_gold") {
       cssStyles = `
         body { background: #111111; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 100px; }
-        .title { font-size: 68px; color: #EAB308; margin-bottom: 30px; text-align: center; line-height: 1.4; }
-        .sub { font-size: 48px; color: #FFFFFF; text-align: center; line-height: 1.4; }
-        .brand { color: #FFFFFF; font-size: 24px; margin-top: 60px; }
+        .title { font-size: 80px; color: #EAB308; margin-bottom: 30px; text-align: center; line-height: 1.35; }
+        .sub { font-size: 56px; color: #FFFFFF; text-align: center; line-height: 1.35; }
+        .brand { color: #FFFFFF; font-size: 26px; margin-top: 60px; }
       `;
       contentHTML = `<h1 class="title">${titleText}</h1>${subText ? `<p class="sub">${subText}</p>` : ""}<div class="brand">${brand}</div>`;
     
@@ -98,9 +98,9 @@ export async function POST(req: NextRequest) {
       cssStyles = `
         body { background: #FAFAFA; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 80px; }
         .content-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .title { font-size: 64px; color: #111111; margin-bottom: 30px; text-align: center; font-weight: 700; line-height: 1.4; }
-        .block-body { background: #111111; color: #EAB308; padding: 18px 36px; font-size: 48px; text-align: center; font-weight: 600; display: inline-block; line-height: 1.4; }
-        .brand { color: #111111; font-size: 24px; margin-top: 60px; font-weight: 600;}
+        .title { font-size: 76px; color: #111111; margin-bottom: 30px; text-align: center; font-weight: 700; line-height: 1.35; }
+        .block-body { background: #111111; color: #EAB308; padding: 22px 42px; font-size: 56px; text-align: center; font-weight: 600; display: inline-block; line-height: 1.35; }
+        .brand { color: #111111; font-size: 26px; margin-top: 60px; font-weight: 600;}
       `;
       contentHTML = `<div class="content-wrapper"><h1 class="title">${titleText}</h1>${subText ? `<div class="block-body">${subText}</div>` : ""}<div class="brand">${brand}</div></div>`;
     }
